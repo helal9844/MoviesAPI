@@ -8,7 +8,7 @@ namespace MoviesAPI.Services
     {
         private readonly AppDbcontext _context;
         private long _postersize = 1048576;
-        private new List<string> _allowExtentions = new List<string> { ".jpg", ".png" };
+        private List<string> _allowExtentions = new List<string> { ".jpg", ".png" };
         public MoviesServices(AppDbcontext context)
         {
             _context = context;
@@ -38,7 +38,7 @@ namespace MoviesAPI.Services
 
         public Movie GetById(int id)
         {
-            return _context.Movies.Include(p => p.Genre).SingleOrDefault(p => p.ID == id);
+            return _context.Movies.Include(p => p.Genre).Single(p => p.ID == id);
         }
 
         public Movie Update(Movie movie)

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesAPI.Data;
@@ -10,15 +12,20 @@ namespace MoviesAPI.Controllers
 {
     
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class GenresController : ControllerBase
     {
         private readonly IGenresServices _genresServices;
-        public GenresController(IGenresServices genresServices)
+        private readonly UserManager<User> userManager;
+
+        public GenresController(IGenresServices genresServices,UserManager<User> userManager)
         {
             _genresServices = genresServices;
+            this.userManager = userManager;
         }
         [HttpGet]
+        [Authorize("User")]
         public IActionResult GetAll()
         {
             var genres = _genresServices.GetAll();
@@ -27,10 +34,10 @@ namespace MoviesAPI.Controllers
             return Ok(genres);
         }
         [HttpGet("{id}")]
+        [Authorize("User")]
         public IActionResult GetById(int id)
         {
-            if (id == null)
-                return BadRequest();
+            
             var genres = _genresServices.GetById(id);
             if (genres == null)
                 return NotFound();
@@ -38,6 +45,7 @@ namespace MoviesAPI.Controllers
             return Ok(genres);
         }
         [HttpPost]
+        [Authorize("AdminOnly")]
         public IActionResult Add(AddGenreDTO addGenreDTO)
         {
             var genre = new Genre { Name = addGenreDTO.Name };
@@ -46,6 +54,7 @@ namespace MoviesAPI.Controllers
             return Ok(genre);
         }
         [HttpPut("{id}")]
+        [Authorize("AdminOnly")]
         public IActionResult EditById(int id, [FromBody]AddGenreDTO addGenreDTO)
         {
             var genre = _genresServices.GetById(id);
@@ -56,6 +65,7 @@ namespace MoviesAPI.Controllers
             return Ok(genre);
         }
         [HttpDelete("{id}")]
+        [Authorize("AdminOnly")]
         public IActionResult DeleteById(int id)
         {
             var genre = _genresServices.GetById(id);

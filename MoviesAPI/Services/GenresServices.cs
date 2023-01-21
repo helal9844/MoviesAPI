@@ -39,7 +39,7 @@ namespace MoviesAPI.Services
 
         public Genre GetById(int id)
         {
-            return _context.Genres.SingleOrDefault(p => p.ID == id);
+            return _context.Genres.Single(p => p.ID == id);
         }
 
         public bool IsValidGenre(int id)

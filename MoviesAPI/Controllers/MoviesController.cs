@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesAPI.Data;
@@ -12,48 +14,75 @@ using System.Security.Cryptography.Xml;
 namespace MoviesAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class MoviesController : ControllerBase
     {
+        private readonly UserManager<User> _userManger;
         private readonly IMoviesServices _moviesServices;
         private readonly IGenresServices _genresServices;
         private readonly IMapper _mapper;
 
         private long _postersize = 1048576;
         private List<string> _allowExtentions = new List<string> { ".jpg", ".png" };
-        public MoviesController(IMoviesServices moviesServices,IGenresServices genresServices, IMapper mapper)
+        public MoviesController(IMoviesServices moviesServices,IGenresServices genresServices, IMapper mapper, UserManager<User> userManger)
         {
             _genresServices = genresServices;
             _moviesServices = moviesServices;
             _mapper = mapper;
+            _userManger = userManger;
         }
         [HttpGet]
-        public IActionResult GetAll()   
+        [Authorize(policy:"User")]
+        public async Task<IActionResult> GetAll()   
         {
             var movies = _moviesServices.GetAll();
             var data = _mapper.Map<IEnumerable<MovieDetailsDTO>>(movies);
-            return Ok(data);
+           // User? user = await _userManger.GetUserAsync(User);
+            return Ok(new
+            {
+                data,
+               // Id = user.Id,
+               // Data = user.UserName
+
+            });
         }
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        [Authorize(policy: "User")]
+        public async Task<IActionResult> GetById(int id)
         {
             
             var movies = _moviesServices.GetById(id);
             if (movies == null)
                 return BadRequest("No Movie Found");
-            var dto = _mapper.Map<MovieDetailsDTO>(movies); 
+            var dto = _mapper.Map<MovieDetailsDTO>(movies);
+           // User? user = await _userManger.GetUserAsync(User);
 
-            return Ok(dto);
+            return Ok(new 
+            {
+                dto,
+                //Id = user.Id,
+                //Data = user.UserName
+            });
         }
         [HttpGet("GenreId")]
-        public IActionResult GetByGenreId(int genreid)
+        [Authorize(policy: "User")]
+        public async Task<IActionResult> GetByGenreId(int genreid)
         {
             var movies = _moviesServices.GetAll(genreid);
             var data = _mapper.Map<IEnumerable<MovieDetailsDTO>>(movies);
-            return Ok(data);
+            //User? user = await _userManger.GetUserAsync(User);
+
+            return Ok(new
+            { 
+                data,
+                //Id = user.Id,
+                //Data = user.UserName
+            });
         }
         [HttpPost]
-        public IActionResult Add([FromForm] MovieDTO movieDTO)
+        [Authorize(policy: "AdminOnly")]
+        public async Task<IActionResult> Add([FromForm] MovieDTO movieDTO)
         {
             if (movieDTO.Poster == null)
                 return BadRequest("Poster Is Required");
@@ -77,11 +106,20 @@ namespace MoviesAPI.Controllers
 
             movie.Poster = datastream.ToArray();
             _moviesServices.Add(movie);
-            return Ok(movie);
+
+            //User? user = await _userManger.GetUserAsync(User);
+
+            return Ok( new 
+            {
+                movie,
+                //Id = user.Id,
+                //Data = user.UserName
+            });
         }
 
         [HttpPut("{id}")]
-        public IActionResult EditById(int id,[FromForm]MovieDTO movieDTO)
+        [Authorize(policy: "AdminOnly")]
+        public async Task<IActionResult> EditById(int id,[FromForm]MovieDTO movieDTO)
         {
             
             
@@ -112,18 +150,32 @@ namespace MoviesAPI.Controllers
             movie.GenreId = movieDTO.GenreId;
 
             _moviesServices.Update(movie);
-            return Ok(movie);
+            //User? user = await _userManger.GetUserAsync(User);
+
+            return Ok( new
+            { 
+                movie,
+                //Id = user.Id,
+                //Data = user.UserName
+            });
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteById(int id)
+        [Authorize(policy: "AdminOnly")]
+        public async Task<IActionResult> DeleteById(int id)
         {
             
             var movie = _moviesServices.GetById(id);
             if (movie == null)
                 return BadRequest("No Movie Found");
             _moviesServices.Delete(movie);
-            return Ok("Movie Deleted");
+            //User? user = await _userManger.GetUserAsync(User);
+
+            return Ok(new {
+                Del = "Movie Deleted", 
+                //Id = user.Id,
+               // Data = user.UserName
+            });
         }
     }
 }
