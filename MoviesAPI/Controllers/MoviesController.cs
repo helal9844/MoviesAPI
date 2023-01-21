@@ -38,13 +38,11 @@ namespace MoviesAPI.Controllers
         {
             var movies = _moviesServices.GetAll();
             var data = _mapper.Map<IEnumerable<MovieDetailsDTO>>(movies);
-           // User? user = await _userManger.GetUserAsync(User);
+            User? user = await _userManger.GetUserAsync(User);
             return Ok(new
             {
                 data,
-               // Id = user.Id,
-               // Data = user.UserName
-
+                ID = user.Id,
             });
         }
         [HttpGet("{id}")]
@@ -56,13 +54,13 @@ namespace MoviesAPI.Controllers
             if (movies == null)
                 return BadRequest("No Movie Found");
             var dto = _mapper.Map<MovieDetailsDTO>(movies);
-           // User? user = await _userManger.GetUserAsync(User);
+            User? user = await _userManger.GetUserAsync(User);
 
             return Ok(new 
             {
                 dto,
-                //Id = user.Id,
-                //Data = user.UserName
+                ID = user.Id,
+                
             });
         }
         [HttpGet("GenreId")]
@@ -71,13 +69,12 @@ namespace MoviesAPI.Controllers
         {
             var movies = _moviesServices.GetAll(genreid);
             var data = _mapper.Map<IEnumerable<MovieDetailsDTO>>(movies);
-            //User? user = await _userManger.GetUserAsync(User);
+            User? user = await _userManger.GetUserAsync(User);
 
             return Ok(new
             { 
                 data,
-                //Id = user.Id,
-                //Data = user.UserName
+                ID = user.Id
             });
         }
         [HttpPost]
@@ -107,13 +104,12 @@ namespace MoviesAPI.Controllers
             movie.Poster = datastream.ToArray();
             _moviesServices.Add(movie);
 
-            //User? user = await _userManger.GetUserAsync(User);
+            User? user = await _userManger.GetUserAsync(User);
 
             return Ok( new 
             {
                 movie,
-                //Id = user.Id,
-                //Data = user.UserName
+                ID = user.Id,
             });
         }
 
@@ -150,13 +146,12 @@ namespace MoviesAPI.Controllers
             movie.GenreId = movieDTO.GenreId;
 
             _moviesServices.Update(movie);
-            //User? user = await _userManger.GetUserAsync(User);
+            User? user = await _userManger.GetUserAsync(User);
 
             return Ok( new
             { 
                 movie,
-                //Id = user.Id,
-                //Data = user.UserName
+                ID = user.Id,
             });
         }
 
@@ -169,12 +164,11 @@ namespace MoviesAPI.Controllers
             if (movie == null)
                 return BadRequest("No Movie Found");
             _moviesServices.Delete(movie);
-            //User? user = await _userManger.GetUserAsync(User);
+            User? user = await _userManger.GetUserAsync(User);
 
             return Ok(new {
                 Del = "Movie Deleted", 
-                //Id = user.Id,
-               // Data = user.UserName
+                ID = user.Id,
             });
         }
     }

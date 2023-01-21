@@ -1,22 +1,30 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using MoviesAPI.Data;
 using MoviesAPI.Models;
+
 
 namespace MoviesAPI.Services
 {
     public class MoviesServices : IMoviesServices   
     {
         private readonly AppDbcontext _context;
+        private readonly UsersContext _usersContext;
+        private readonly UserManager<User> _userManager;
         private long _postersize = 1048576;
         private List<string> _allowExtentions = new List<string> { ".jpg", ".png" };
-        public MoviesServices(AppDbcontext context)
+        public MoviesServices(AppDbcontext context,UsersContext usersContext,UserManager<User> userManager)
         {
             _context = context;
+            _usersContext = usersContext;
+            _userManager = userManager;
         }
         public Movie Add(Movie movie)
         {
             _context.Add(movie);
             _context.SaveChanges();
+            
             return movie;
         }
 
